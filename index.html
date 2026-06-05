@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=6,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#141414"/>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<title>Trans-Pyrenees</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+ html,body{margin:0;height:100%;font-family:-apple-system,Arial,sans-serif}
+ #map{position:absolute;top:0;bottom:0;left:0;right:0}
+ .bar{position:absolute;left:8px;right:8px;top:env(safe-area-inset-top,6px);z-index:1000;
+   background:rgba(20,20,20,.88);color:#fff;padding:7px 10px;border-radius:9px;font-size:12px;line-height:1.35}
+ .bar b{color:#ffcc55}
+ .btns{position:absolute;left:8px;bottom:calc(12px + env(safe-area-inset-bottom,0));z-index:1000;display:flex;gap:8px;flex-wrap:wrap}
+ .btn{padding:11px 13px;font-size:14px;font-weight:600;color:#fff;border:none;border-radius:9px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+ #follow{background:#1e88e5}#dl{background:#2e7d32}
+ #prog{position:absolute;left:8px;right:8px;bottom:calc(64px + env(safe-area-inset-bottom,0));z-index:1000;
+   background:rgba(20,20,20,.92);color:#fff;padding:9px 12px;border-radius:9px;font-size:13px;display:none}
+ #bar2{background:#333;border-radius:5px;height:8px;margin-top:6px;overflow:hidden}#bar2 i{display:block;height:100%;width:0;background:#2e7d32}
+</style>
+</head>
+<body>
+<div class="bar">🏍️ <b>Trans-Pyrenees</b> · Begur→San Sebastián · <b style="color:#ff8a80">red line = planning corridor, not verified TET</b> · ⛽114 🛒286</div>
+<div id="map"></div>
+<div id="prog">Saving maps for offline… <span id="ptxt">0%</span><div id="bar2"><i id="pbar"></i></div></div>
+<div class="btns">
+  <button id="follow" class="btn">📍 Follow me</button>
+  <button id="dl" class="btn">⬇️ Save maps offline</button>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="./data.js"></script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
+
+var map=L.map('map',{zoomControl:true});
+var tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'© OpenStreetMap'}).addTo(map);
+
+L.polyline(ROUTE,{color:'#d32f2f',weight:4,opacity:.85,dashArray:'2,9'}).addTo(map);
+function cm(lat,lon,col,r){return L.circleMarker([lat,lon],{radius:r,color:'#fff',weight:2,fillColor:col,fillOpacity:1});}
+var Ln=L.layerGroup(),Ld=L.layerGroup(),Lf=L.layerGroup(),Lg=L.layerGroup();
+NIGHTS.forEach(function(p){cm(p[0],p[1],'#1565c0',9).bindPopup('<b>'+p[2]+'</b>').addTo(Ln);});
+DIRT.forEach(function(p){cm(p[0],p[1],'#e65100',8).bindPopup('<b>'+p[2]+'</b>').addTo(Ld);});
+FUEL.forEach(function(p){cm(p.lat,p.lon,'#2e7d32',5).bindPopup('⛽ '+p.n).addTo(Lf);});
+FOOD.forEach(function(p){cm(p.lat,p.lon,'#6a1b9a',5).bindPopup('🛒 '+p.n).addTo(Lg);});
+Ln.addTo(map);Ld.addTo(map);Lf.addTo(map);Lg.addTo(map);
+L.control.layers(null,{'🔵 Overnight':Ln,'🟠 Dirt zones':Ld,'⛽ Fuel':Lf,'🛒 Food':Lg},{collapsed:true}).addTo(map);
+map.fitBounds(L.polyline(ROUTE).getBounds().pad(0.08));
+
+// ---- Follow me (live GPS) ----
+var me=null,acc=null;
+document.getElementById('follow').onclick=function(){
+  map.locate({watch:true,enableHighAccuracy:true,setView:true,maxZoom:14});
+};
+map.on('locationfound',function(e){
+  if(!me){me=L.circleMarker(e.latlng,{radius:8,color:'#fff',weight:3,fillColor:'#1e88e5',fillOpacity:1}).addTo(map);
+    acc=L.circle(e.latlng,{radius:e.accuracy/2,color:'#1e88e5',weight:1,fillOpacity:.08}).addTo(map);}
+  else{me.setLatLng(e.latlng);acc.setLatLng(e.latlng).setRadius(e.accuracy/2);}
+});
+map.on('locationerror',function(){alert('Allow Location so the app can follow you.');});
+
+// ---- Save tiles offline along the corridor ----
+function lon2x(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z));}
+function lat2y(lat,z){var r=lat*Math.PI/180;return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z));}
+function densify(pts,step){var out=[];for(var i=0;i<pts.length-1;i++){var a=pts[i],b=pts[i+1];
+  var d=Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));var n=Math.max(1,Math.ceil(d/step));
+  for(var k=0;k<n;k++){out.push([a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n]);}}out.push(pts[pts.length-1]);return out;}
+
+document.getElementById('dl').onclick=async function(){
+  var pts=densify(ROUTE,0.02);
+  var subs=['a','b','c'];var urls=new Set();
+  for(var z=6;z<=12;z++){
+    var buf=(z<=9)?2:1;
+    for(var i=0;i<pts.length;i++){
+      var cx=lon2x(pts[i][1],z),cy=lat2y(pts[i][0],z);
+      for(var dx=-buf;dx<=buf;dx++)for(var dy=-buf;dy<=buf;dy++){
+        var x=cx+dx,y=cy+dy;if(x<0||y<0)continue;
+        urls.add('https://'+subs[(x+y)%3]+'.tile.openstreetmap.org/'+z+'/'+x+'/'+y+'.png');
+      }
+    }
+  }
+  var list=Array.from(urls),total=list.length,done=0,fail=0;
+  if(!confirm('Download ~'+total+' map tiles (~'+Math.round(total*18/1024)+' MB) for offline use? Stay on wifi.'))return;
+  document.getElementById('prog').style.display='block';
+  var cache=await caches.open('tp-tiles');
+  var idx=0;
+  async function worker(){
+    while(idx<list.length){
+      var u=list[idx++];
+      try{var r=await fetch(u,{mode:'cors',cache:'force-cache'});if(r.ok)await cache.put(u,r.clone());}catch(e){fail++;}
+      done++;
+      if(done%15===0||done===total){
+        var pct=Math.round(done/total*100);
+        document.getElementById('ptxt').textContent=pct+'%  ('+done+'/'+total+')';
+        document.getElementById('pbar').style.width=pct+'%';
+      }
+      await new Promise(function(r){setTimeout(r,15);});
+    }
+  }
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  document.getElementById('ptxt').textContent='Done ✓  '+(total-fail)+' tiles saved'+(fail?(' ('+fail+' failed)'):'');
+  setTimeout(function(){document.getElementById('prog').style.display='none';},4000);
+};
+</script>
+</body>
+</html>
