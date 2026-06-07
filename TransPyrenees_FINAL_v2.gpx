@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Trans-Pyrenees FINAL v2" xmlns="http://www.topografix.com/GPX/1/1">
-<metadata><name>Begur to San Sebastian OFF-ROAD FINAL v2 (optimised: route+food+vistas+fuel+camp)</name></metadata>
+<metadata><name>Begur to San Sebastian OFF-ROAD FINAL (route+food+vistas+fuel+confirmed camps)</name></metadata>
 <wpt lat="41.954" lon="3.207"><name>START Begur</name><sym>Flag, Blue</sym></wpt>
 <wpt lat="42.267" lon="2.96"><name>Figueres GEAR (Outlet del Motero/Tecnimoto)</name><sym>Flag, Blue</sym></wpt>
 <wpt lat="42.3591" lon="-0.7448"><name>VISTA Mallos de Riglos - SUNSET, red towers</name><sym>Scenic Area</sym></wpt>
@@ -39,13 +39,13 @@
 <wpt lat="42.247" lon="0.968"><name>FUEL La Pobla - before Boumort</name><sym>Gas Station</sym></wpt>
 <wpt lat="42.419" lon="0.137"><name>FUEL Ainsa</name><sym>Gas Station</sym></wpt>
 <wpt lat="42.57" lon="-0.549"><name>FUEL Jaca - fill tank + 3-5L bottle</name><sym>Gas Station</sym></wpt>
-<wpt lat="42.741" lon="-0.752"><name>FUEL Hecho Moeve A-176 - LAST before Oza/Anso, before 14:00!</name><sym>Gas Station</sym></wpt>
+<wpt lat="42.741" lon="-0.752"><name>FUEL Hecho Moeve A-176 07-14/16-20h tel974375321 - LAST before Oza/Anso!</name><sym>Gas Station</sym></wpt>
 <wpt lat="42.82" lon="-0.95"><name>FUEL Urzainqui/Isaba - LAST before Belagua</name><sym>Gas Station</sym></wpt>
-<wpt lat="42.41" lon="1.132"><name>CAMP Noguera Pallaresa (Sort)</name><sym>Campground</sym></wpt>
-<wpt lat="42.596" lon="-0.111"><name>CAMP Camping Oto (Broto)</name><sym>Campground</sym></wpt>
-<wpt lat="42.566" lon="-0.56"><name>CAMP Camping Ain Jaca</name><sym>Campground</sym></wpt>
-<wpt lat="42.842" lon="-0.797"><name>CAMP Camping Zuriza</name><sym>Campground</sym></wpt>
-<wpt lat="42.876" lon="-0.836"><name>CAMP Camping Asolaze (Isaba)</name><sym>Campground</sym></wpt>
+<wpt lat="42.305" lon="2.172"><name>CAMP Vall de Ribes tel972728820 ~EUR20-26 (open June)</name><sym>Campground</sym></wpt>
+<wpt lat="42.41" lon="1.132"><name>CAMP Noguera Pallaresa Sort tel973620820 ~EUR20-25 (confirm)</name><sym>Campground</sym></wpt>
+<wpt lat="42.419" lon="0.141"><name>CAMP Camping Ainsa tel974500260 ~EUR17-19 moto-friendly</name><sym>Campground</sym></wpt>
+<wpt lat="42.741" lon="-0.752"><name>CAMP Valle de Hecho tel974375361 ~EUR15 cheapest all-year</name><sym>Campground</sym></wpt>
+<wpt lat="43.312" lon="-2.04"><name>CAMP Igueldo San Sebastian tel943214502 EUR17 early-June</name><sym>Campground</sym></wpt>
 <trk><name>Begur -&gt; San Sebastian OFF-ROAD</name><trkseg>
 <trkpt lat="41.953985" lon="3.207152"></trkpt>
 <trkpt lat="41.953823" lon="3.207123"></trkpt>
